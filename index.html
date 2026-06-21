@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智慧閱讀平臺・教育雲與線上資料庫介接 釐清說明 ｜ 2026.06.22</title>
+<meta name="description" content="臺北市智慧閱讀平臺 — 致建置廠商凌網資訊：關於線上資料庫介接所需之「教育雲」身分驗證、本中心可提供之協助，以及巨耀線上資料庫介接規格附件">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,400..700&family=Noto+Serif+TC:wght@300;400;500;600;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f3ede1;
+  --paper-2:#ece3d3;
+  --ink:#1f1c17;
+  --ink-soft:#5a534760;
+  --ink-mid:#6b6253;
+  --seal:#b23a2e;
+  --seal-deep:#8f2c22;
+  --gold:#a07d3e;
+  --line:rgba(31,28,23,.14);
+  --line-strong:rgba(31,28,23,.28);
+  --card:#faf6ed;
+  --shadow:0 18px 50px -20px rgba(31,28,23,.45);
+  --serif:"Noto Serif TC",serif;
+  --display:"Fraunces","Noto Serif TC",serif;
+  --sans:"Noto Sans TC",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family:var(--serif);
+  background:var(--paper);
+  color:var(--ink);
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+/* 紙質紋理 */
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(120% 120% at 8% 4%, #f7f1e6 0%, rgba(247,241,230,0) 42%),
+    radial-gradient(120% 120% at 96% 98%, #e7dcc7 0%, rgba(231,220,199,0) 46%);
+  mix-blend-mode:multiply;opacity:.9;
+}
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- deck ---------- */
+.deck{position:relative;width:100vw;height:100vh;z-index:1}
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(2.2rem,5.5vw,6rem) clamp(2.2rem,7vw,9rem);
+  opacity:0;visibility:hidden;
+  transform:translateY(14px) scale(.994);
+  transition:opacity .6s ease, transform .6s cubic-bezier(.2,.7,.2,1), visibility 0s .6s;
+}
+.slide.active{opacity:1;visibility:visible;transform:none;transition:opacity .6s ease, transform .7s cubic-bezier(.2,.7,.2,1);}
+.slide.active .reveal{animation:rise .8s cubic-bezier(.2,.7,.2,1) both}
+.slide.active .reveal:nth-child(2){animation-delay:.08s}
+.slide.active .reveal:nth-child(3){animation-delay:.16s}
+.slide.active .reveal:nth-child(4){animation-delay:.24s}
+.slide.active .reveal:nth-child(5){animation-delay:.32s}
+@keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+.kicker{
+  font-family:var(--sans);font-weight:700;
+  font-size:clamp(.66rem,1vw,.8rem);letter-spacing:.34em;
+  text-transform:uppercase;color:var(--seal);
+  display:flex;align-items:center;gap:.9rem;margin-bottom:1.4rem;
+}
+.kicker::before{content:"";width:clamp(22px,3vw,46px);height:2px;background:var(--seal)}
+.snum{
+  font-family:var(--display);font-weight:300;font-style:italic;
+  font-size:clamp(.9rem,1.1vw,1rem);color:var(--ink-mid);
+}
+h1,h2{font-weight:700;line-height:1.12;letter-spacing:-.01em}
+.slide h2{font-size:clamp(1.7rem,4.2vw,3.3rem);margin-bottom:.4rem}
+.lead{font-size:clamp(1.02rem,1.6vw,1.4rem);color:var(--ink-mid);font-weight:400;line-height:1.7;max-width:62ch}
+.hl{color:var(--seal);font-weight:600}
+.ink{color:var(--ink)}
+.u{box-shadow:inset 0 -.5em 0 rgba(178,58,46,.16)}
+
+/* ---------- cover ---------- */
+.cover{justify-content:center}
+.cover .marque,.cover .sub,.cover .meta{position:relative;z-index:2}
+.cover-art{
+  position:absolute;right:clamp(-4%,-1.5vw,0px);top:50%;
+  transform:translateY(-44%);
+  width:min(50vw,620px);max-height:96%;object-fit:contain;
+  mix-blend-mode:multiply;opacity:.96;pointer-events:none;z-index:1;
+  -webkit-mask-image:radial-gradient(120% 110% at 62% 50%, #000 64%, transparent 99%);
+  mask-image:radial-gradient(120% 110% at 62% 50%, #000 64%, transparent 99%);
+  animation:artin 1.3s cubic-bezier(.2,.7,.2,1) both;
+}
+@keyframes artin{from{opacity:0;transform:translateY(-44%) scale(1.04)}to{opacity:.96;transform:translateY(-44%)}}
+.cover .marque{position:relative}
+.seal{
+  position:absolute;top:clamp(-.4rem,-1vw,-1rem);right:clamp(0rem,2vw,2rem);
+  width:clamp(82px,9vw,128px);height:clamp(82px,9vw,128px);
+  border:2.5px solid var(--seal);border-radius:14px;
+  display:grid;place-content:center;transform:rotate(6deg);
+  color:var(--seal);font-weight:900;font-size:clamp(1.5rem,2.4vw,2.4rem);
+  letter-spacing:.05em;line-height:1;box-shadow:0 0 0 5px rgba(178,58,46,.08);
+  writing-mode:vertical-rl;padding:.4rem .2rem;
+}
+.seal span{display:block}
+.cover h1{font-size:clamp(2.4rem,6.4vw,5.4rem);line-height:1.06;margin:.2rem 0 1.3rem}
+.cover h1 .row2{color:var(--seal)}
+.cover .sub{font-size:clamp(1.05rem,1.9vw,1.6rem);color:var(--ink-mid);font-weight:400;letter-spacing:.02em;border-left:3px solid var(--gold);padding-left:1rem;margin:.4rem 0 2.4rem;max-width:48ch;line-height:1.6}
+.cover .meta{display:flex;flex-wrap:wrap;gap:.7rem 1.6rem;font-family:var(--sans);font-size:clamp(.78rem,1.1vw,.95rem);color:var(--ink-mid);letter-spacing:.06em}
+.cover .meta b{color:var(--ink);font-weight:700}
+.cover .meta .dot{color:var(--seal)}
+
+/* ---------- 內容區塊 ---------- */
+.body{margin-top:clamp(1.2rem,2.4vw,2.2rem);display:flex;flex-direction:column;gap:1.1rem;max-width:78ch}
+ul.clean{list-style:none;display:flex;flex-direction:column;gap:.85rem}
+ul.clean li{position:relative;padding-left:1.7rem;font-size:clamp(.98rem,1.45vw,1.22rem);line-height:1.6;color:var(--ink)}
+ul.clean li::before{content:"";position:absolute;left:0;top:.62em;width:9px;height:9px;background:var(--seal);border-radius:2px;transform:rotate(45deg)}
+ul.clean li b{font-weight:700}
+.muted{color:var(--ink-mid)}
+
+/* 流程圖 */
+.flow{display:flex;align-items:stretch;flex-wrap:wrap;gap:.6rem;margin-top:1.6rem}
+.node{
+  flex:1 1 140px;min-width:130px;background:var(--card);border:1.5px solid var(--line-strong);
+  border-radius:12px;padding:1rem 1.1rem;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:.3rem;
+}
+.node .t{font-weight:700;font-size:clamp(1rem,1.4vw,1.2rem)}
+.node .d{font-size:.84rem;color:var(--ink-mid);font-family:var(--sans);line-height:1.5}
+.node.accent{border-color:var(--seal);background:#fbf2ee}
+.node.accent .t{color:var(--seal-deep)}
+.arrow{align-self:center;font-family:var(--display);color:var(--gold);font-size:1.6rem;font-weight:600;padding:0 .1rem}
+.flowcap{font-family:var(--sans);font-size:.86rem;color:var(--ink-mid);margin-top:1rem;line-height:1.6;border-top:1px dashed var(--line-strong);padding-top:.9rem;max-width:80ch}
+
+/* 兩欄卡片 */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;margin-top:1.6rem}
+.cmp .col{background:var(--card);border-radius:14px;padding:1.3rem 1.4rem;box-shadow:var(--shadow);border:1.5px solid var(--line)}
+.cmp .col.want{border-color:var(--seal);background:#fbf2ee}
+.cmp .col h3{font-size:1.15rem;margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem}
+.cmp .col.have h3{color:var(--ink-mid)}
+.cmp .col.want h3{color:var(--seal-deep)}
+.cmp .tag{font-family:var(--sans);font-size:.68rem;font-weight:700;letter-spacing:.1em;padding:.18rem .5rem;border-radius:99px;text-transform:uppercase}
+.cmp .have .tag{background:#e3d8c4;color:var(--ink-mid)}
+.cmp .want .tag{background:var(--seal);color:#fff}
+.cmp p{font-size:clamp(.92rem,1.25vw,1.08rem);line-height:1.6;color:var(--ink)}
+.cmp p+p{margin-top:.6rem}
+.cmp .col.have p{color:var(--ink-mid)}
+
+/* 表格 */
+.tbl{margin-top:1.5rem;border:1.5px solid var(--line-strong);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);background:var(--card)}
+.tbl .tr{display:grid;grid-template-columns:.9fr 1.6fr;border-bottom:1px solid var(--line)}
+.tbl .tr:last-child{border-bottom:0}
+.tbl .tr.head{background:#efe5d4}
+.tbl .th,.tbl .td{padding:.7rem 1.1rem;font-size:clamp(.86rem,1.15vw,1.02rem);line-height:1.45}
+.tbl .th{font-family:var(--sans);font-weight:700;letter-spacing:.04em;color:var(--ink)}
+.tbl .tr .td:first-child{font-weight:600;border-right:1px solid var(--line)}
+.tbl .tr .th:first-child{border-right:1px solid var(--line)}
+.tbl .td .why{color:var(--ink-mid);font-family:var(--sans);font-size:.92em}
+.tbl .code{font-family:var(--sans);font-weight:700;color:var(--seal-deep)}
+
+/* 編號清單格 */
+.grid6{display:grid;grid-template-columns:repeat(2,1fr);gap:.9rem;margin-top:1.5rem}
+.cell{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:1.1rem 1.2rem;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.cell .no{font-family:var(--display);font-style:italic;font-weight:400;font-size:1.6rem;color:var(--seal);line-height:1}
+.cell .ct{font-weight:700;font-size:clamp(1rem,1.3vw,1.18rem);margin:.45rem 0 .25rem}
+.cell .cd{font-family:var(--sans);font-size:.84rem;color:var(--ink-mid);line-height:1.55}
+
+/* 下載按鈕 */
+.dl{margin-top:1.7rem;display:inline-flex;align-items:center;gap:.8rem;font-family:var(--sans);font-weight:700;
+  background:var(--seal);color:#fff;text-decoration:none;padding:.95rem 1.6rem;border-radius:12px;
+  box-shadow:var(--shadow);font-size:clamp(.95rem,1.3vw,1.1rem);transition:.25s;letter-spacing:.02em}
+.dl:hover{background:var(--seal-deep);transform:translateY(-2px)}
+.dl .ic{font-size:1.3rem;line-height:1}
+.dl small{display:block;font-weight:400;font-size:.74rem;opacity:.85;letter-spacing:.04em}
+
+/* 聯絡卡 */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.6rem}
+.who{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:1.15rem 1.2rem;box-shadow:var(--shadow)}
+.who .role{font-family:var(--sans);font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--seal)}
+.who .nm{font-weight:700;font-size:1.2rem;margin:.3rem 0 .1rem}
+.who .org{font-family:var(--sans);font-size:.84rem;color:var(--ink-mid);line-height:1.5}
+
+.note{margin-top:1.4rem;font-family:var(--sans);font-size:.88rem;color:var(--ink-mid);background:#efe6d650;border-left:3px solid var(--gold);padding:.7rem 1rem;border-radius:0 8px 8px 0;line-height:1.6;max-width:80ch}
+.note b{color:var(--seal-deep)}
+
+/* 結語 */
+.closing{justify-content:center}
+.closing-art{position:absolute;right:-7%;bottom:-12%;width:min(46vw,540px);object-fit:contain;mix-blend-mode:multiply;opacity:.12;pointer-events:none;z-index:0}
+.closing .reveal,.closing .cards,.closing .note{position:relative;z-index:1}
+.closing h2{font-size:clamp(2rem,5vw,4rem);max-width:20ch;line-height:1.18}
+.closing .big{color:var(--seal)}
+
+/* ---------- chrome ---------- */
+.chrome{position:fixed;z-index:20;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:space-between;padding:1rem clamp(1.4rem,4vw,3rem);pointer-events:none}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--seal);z-index:21;transition:width .5s cubic-bezier(.2,.7,.2,1);box-shadow:0 0 12px rgba(178,58,46,.5)}
+.counter{font-family:var(--display);font-style:italic;color:var(--ink-mid);font-size:.95rem;pointer-events:auto}
+.counter b{color:var(--ink);font-weight:600}
+.nav{display:flex;gap:.5rem;pointer-events:auto}
+.nav button{
+  width:42px;height:42px;border-radius:50%;border:1.5px solid var(--line-strong);
+  background:var(--paper);color:var(--ink);cursor:pointer;font-size:1.1rem;
+  display:grid;place-content:center;transition:.25s;font-family:var(--serif);
+}
+.nav button:hover{background:var(--seal);color:#fff;border-color:var(--seal);transform:translateY(-2px)}
+.nav button:disabled{opacity:.3;cursor:default;transform:none;background:var(--paper);color:var(--ink);border-color:var(--line)}
+.dots{position:fixed;right:clamp(1rem,2.4vw,2rem);top:50%;transform:translateY(-50%);z-index:20;display:flex;flex-direction:column;gap:.6rem}
+.dots i{width:8px;height:8px;border-radius:50%;background:var(--line-strong);cursor:pointer;transition:.25s;display:block}
+.dots i.on{background:var(--seal);transform:scale(1.5)}
+.hint{position:fixed;left:50%;bottom:1.1rem;transform:translateX(-50%);font-family:var(--sans);font-size:.72rem;color:var(--ink-mid);letter-spacing:.1em;z-index:20;opacity:.7;animation:fade 4s 3s forwards}
+@keyframes fade{to{opacity:0;visibility:hidden}}
+
+@media(max-width:760px){
+  .grid6,.cards{grid-template-columns:1fr}
+  .cmp{grid-template-columns:1fr}
+  .flow .arrow{transform:rotate(90deg)}
+  .tbl .tr{grid-template-columns:1fr}
+  .tbl .tr .td:first-child,.tbl .tr .th:first-child{border-right:0;border-bottom:1px solid var(--line)}
+  .dots{display:none}
+  .cover-art{opacity:.14;width:118%;right:auto;left:-9%;mask-image:none;-webkit-mask-image:none}
+}
+@media print{
+  body{overflow:visible;height:auto}
+  .slide{position:relative;opacity:1!important;visibility:visible!important;transform:none!important;height:100vh;page-break-after:always;border-bottom:1px solid #ccc}
+  .chrome,.dots,.progress,.hint{display:none}
+}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 封面 -->
+  <section class="slide cover active">
+    <img class="cover-art" src="assets/cover.png" alt="">
+    <div class="marque reveal">
+      <div class="seal"><span>智</span><span>閱</span></div>
+      <div class="kicker">臺北市蓬萊國民小學・數位學習中心</div>
+      <h1>教育雲與線上資料庫介接<br><span class="row2">釐清與協力說明</span></h1>
+    </div>
+    <p class="sub reveal">致　智慧閱讀平臺建置廠商・凌網資訊<br>就「線上資料庫介接所需的身分驗證」交換想法，並提出本中心可提供的協助。</p>
+    <div class="meta reveal">
+      <span><b>線上會議</b>　2026.06.22（民國 115 年）11:00</span>
+      <span class="dot">·</span>
+      <span>智慧閱讀平臺建置案</span>
+      <span class="dot">·</span>
+      <span>採購案號 <b>11501</b></span>
+    </div>
+  </section>
+
+  <!-- 2 緣由：組長無法出席 + 今日主題 -->
+  <section class="slide">
+    <div class="reveal"><span class="kicker"><span class="snum">01 / 09</span>　開場說明</span>
+    <h2>先說明，再請凌網回應</h2></div>
+    <div class="body">
+      <ul class="clean">
+        <li class="reveal">數位學習中心周凡淇組長因<b>家中臨時要務</b>，可能無法即時出席本次會議，特<b>先以本簡報</b>把我方立場與想釐清的事說明清楚。</li>
+        <li class="reveal">今天的核心，是<span class="hl">線上資料庫介接會用到的「教育雲」身分驗證</span> — 想先了解凌網對這一塊的掌握程度。</li>
+        <li class="reveal">同時，本中心也<b>準備了幾項協助</b>（原始碼、其他系統的介接經驗、規格附件），希望讓凌網少走冤枉路。</li>
+      </ul>
+      <p class="note reveal">本簡報會後仍可隨時開啟瀏覽；如需進一步討論，歡迎以 <b>email／電話</b>與組長直接聯繫（末頁有窗口）。</p>
+    </div>
+  </section>
+
+  <!-- 3 背景：線上資料庫介接需要身分驗證 -->
+  <section class="slide">
+    <div class="reveal"><span class="kicker"><span class="snum">02 / 09</span>　背景</span>
+    <h2>線上資料庫介接，需要「身分驗證」</h2>
+    <p class="lead">智慧閱讀要承接現行線上資料庫（onlinedb，115/12/31 停服），其介接規格的核心，就是讓使用者能「被正確驗證身分後借閱」。</p></div>
+    <div class="flow reveal">
+      <div class="node"><span class="t">使用者</span><span class="d">學生／教師，自智慧閱讀進入</span></div>
+      <span class="arrow">→</span>
+      <div class="node accent"><span class="t">身分驗證</span><span class="d">getAuthentication（loginMode）</span></div>
+      <span class="arrow">→</span>
+      <div class="node"><span class="t">線上資料庫</span><span class="d">完成借閱／瀏覽</span></div>
+    </div>
+    <p class="flowcap reveal">規格（V1.5）以 <b>getAuthentication</b> 進行身分驗證，並以 <b>loginMode</b> 代碼指定驗證來源。其中臺北市同時支援 <b>單一身分驗證 SSO（代碼 1）</b> 與 <b>教育雲 OPEN_ID（代碼 16）</b> — 後者就是今天要談的「教育雲介接」。</p>
+  </section>
+
+  <!-- 4 核心問題：凌網對教育雲介接的理解程度 -->
+  <section class="slide">
+    <div class="reveal"><span class="kicker"><span class="snum">03 / 09</span>　今日核心</span>
+    <h2>想了解：凌網對「教育雲介接」的掌握程度</h2>
+    <p class="lead">線上資料庫的驗證會用到<b>教育雲（教育部教育體系單一簽入／OpenID）</b>，因此我們想先確認凌網在這一塊的熟悉度與作法。</p></div>
+    <div class="tbl reveal">
+      <div class="tr head"><div class="th">想釐清的事</div><div class="th">原因</div></div>
+      <div class="tr"><div class="td">是否熟悉<span class="code"> 教育雲 OpenID </span>登入流程</div><div class="td"><span class="why">線上資料庫 loginMode＝16（OPEN_ID）會直接用到</span></div></div>
+      <div class="tr"><div class="td">是否曾在其他案場<b>實作過</b>教育雲介接</div><div class="td"><span class="why">評估需不需要本中心提供協助與範例</span></div></div>
+      <div class="tr"><div class="td">教育雲與臺北市 SSO <b>兩套並行</b>的串接規劃</div><div class="td"><span class="why">規格允許 loginMode 相加，需確認實作方式</span></div></div>
+    </div>
+    <p class="note reveal">講白一點：這題不是考試，是<b>盤點落差</b> — 凌網越早讓我們知道哪裡需要支援，本中心越能及時補位。</p>
+  </section>
+
+  <!-- 5 好的基礎：凌網已有台北市 SSO 經驗 -->
+  <section class="slide">
+    <div class="reveal"><span class="kicker"><span class="snum">04 / 09</span>　既有基礎</span>
+    <h2>好消息：臺北市單一身分驗證，凌網已有經驗</h2></div>
+    <div class="cmp reveal">
+      <div class="col have">
+        <h3><span class="tag">已具備</span>臺北市 SSO</h3>
+        <p>據我方了解，凌網<b>先前已有串接臺北市單一身分驗證（SSO）的經驗</b>。</p>
+        <p>這代表 OAuth／導向登入、token 取用、使用者資料對應等基本功，凌網是熟悉的。</p>
+      </div>
+      <div class="col want">
+        <h3><span class="tag">待確認</span>教育雲 OpenID</h3>
+        <p>教育雲（教育部 OpenID）與臺北市 SSO <b>是不同的驗證來源</b>，流程相近但端點與帳號體系不同。</p>
+        <p>想確認：凌網是否<b>同樣涵蓋</b>教育雲，或<b>需要本中心提供協助</b>。</p>
+      </div>
+    </div>
+    <p class="note reveal">既有 SSO 經驗是很好的起點 — 我們樂觀地認為，教育雲介接對凌網而言是<b>「延伸」而非「從零開始」</b>。今天就把這個差距談清楚。</p>
+  </section>
+
+  <!-- 6 我方協助①：原始碼 -->
+  <section class="slide">
+    <div class="reveal"><span class="kicker"><span class="snum">05 / 09</span>　本中心可提供的協助 ①</span>
+    <h2>線上資料庫原始碼（條件式提供）</h2></div>
+    <div class="body">
+      <ul class="clean">
+        <li class="reveal"><b>若教育局能取得</b>現行線上資料庫（onlinedb）的<span class="hl">原始碼</span>，本中心願意在<b>改寫、消化、整理</b>後，提供凌網作為介接參考。</li>
+        <li class="reveal">特別是其中<b>身分驗證（含教育雲 OPEN_ID）</b>的實作部分，可作為凌網實作時的對照範本。</li>
+        <li class="reveal">提供前會先做必要的<b>去識別與整理</b>，讓凌網拿到的是「能用的參考」，而非原始雜亂碼。</li>
+      </ul>
+      <p class="note reveal">⚠️ 誠實告知：原始碼<b>能否取得仍在洽詢中</b>（涉及原維運廠商之著作權與授權條件）。此項屬<b>「若拿得到就提供」</b>的善意協助，不是已到位的交付。</p>
+    </div>
+  </section>
+
+  <!-- 7 我方協助②：中心其他系統的教育雲介接經驗 -->
+  <section class="slide">
+    <div class="reveal"><span class="kicker"><span class="snum">06 / 09</span>　本中心可提供的協助 ②</span>
+    <h2>中心其他系統，已做過教育雲介接</h2>
+    <p class="lead">數位學習中心自建的多套系統，已實際串接過臺北市身分驗證／教育雲，我們可把這些經驗一併整理給凌網。</p></div>
+    <div class="body">
+      <ul class="clean">
+        <li class="reveal">中心既有系統（如<b>課綱管理系統 ailms</b> 等）已實作<b>身分驗證／教育雲登入</b>，踩過的坑與可行作法都有紀錄。</li>
+        <li class="reveal">我們會<b>設法取得並彙整</b>這些介接的設定、流程與注意事項，整理後提供凌網。</li>
+        <li class="reveal">目標是讓凌網的教育雲介接，能<b>站在中心既有經驗上</b>加速完成，降低試誤成本。</li>
+      </ul>
+      <p class="note reveal">這兩項協助（原始碼 ＋ 其他系統經驗）會<b>視取得情況陸續提供</b>；請凌網先讓我們知道，最需要哪一塊的支援。</p>
+    </div>
+  </section>
+
+  <!-- 8 線上資料庫介接規格（檔案私下提供） -->
+  <section class="slide">
+    <div class="reveal"><span class="kicker"><span class="snum">07 / 09</span>　線上資料庫介接規格</span>
+    <h2>巨耀・線上資料庫介接規格 V1.5</h2>
+    <p class="lead">這是線上資料庫的官方介接規格書，凌網實作介接時的主要依據。規格書全文<b>由本中心私下提供</b>，以下先摘要其 4 支 API。</p></div>
+    <div class="tbl reveal" style="margin-top:1.3rem">
+      <div class="tr head"><div class="th">規格內 4 支 API</div><div class="th">用途</div></div>
+      <div class="tr"><div class="td"><span class="code">getAuthentication</span></div><div class="td"><span class="why">身分驗證；loginMode 指定來源（SSO＝1、教育雲 OPEN_ID＝16）</span></div></div>
+      <div class="tr"><div class="td"><span class="code">getConnectProfile</span></div><div class="td"><span class="why">以 sessionID 反查使用者身分（10 分鐘內有效）</span></div></div>
+      <div class="tr"><div class="td"><span class="code">syncDBBook</span></div><div class="td"><span class="why">書目上傳（每筆 24 欄，17 欄必填）</span></div></div>
+      <div class="tr"><div class="td"><span class="code">getDBlog</span></div><div class="td"><span class="why">每日回傳瀏覽紀錄（至少一次）</span></div></div>
+    </div>
+    <p class="note reveal">📎 <b>介接文件不放公開網路</b>：線上資料庫介接規格 V1.5、以及<b>教育雲（單一身分驗證）介接手冊</b>，本中心將於會後<b>另以 email／限閱方式</b>提供凌網，並可一併附上中心既有系統的介接設定參考。</p>
+  </section>
+
+  <!-- 9 想請凌網回覆/確認 -->
+  <section class="slide">
+    <div class="reveal"><span class="kicker"><span class="snum">08 / 09</span>　請凌網於會中／會後回覆</span>
+    <h2>希望凌網幫我們確認這幾件事</h2></div>
+    <div class="grid6">
+      <div class="cell reveal"><div class="no">01</div><div class="ct">教育雲掌握度</div><div class="cd">是否熟悉／實作過教育雲 OpenID 登入？是否需要本中心協助？</div></div>
+      <div class="cell reveal"><div class="no">02</div><div class="ct">兩套驗證並行</div><div class="cd">臺北市 SSO（1）＋ 教育雲（16）的串接規劃與時程</div></div>
+      <div class="cell reveal"><div class="no">03</div><div class="ct">最需要的支援</div><div class="cd">原始碼參考、或中心其他系統的介接範例 — 哪一項較急？</div></div>
+      <div class="cell reveal"><div class="no">04</div><div class="ct">規格疑義</div><div class="cd">看完規格書 V1.5 後，介接上有無需本中心釐清之處</div></div>
+    </div>
+    <p class="note reveal">提醒：智慧閱讀規格為<b>跨縣市共用</b>，身分驗證請<b>不要只綁臺北市</b> — 規格 loginMode 亦含澎湖（2）、金門（4）、連江（8），可視需求相加。</p>
+  </section>
+
+  <!-- 10 結語 + 窗口 -->
+  <section class="slide closing">
+    <img class="closing-art" src="assets/cover.png" alt="">
+    <div class="reveal"><span class="kicker"><span class="snum">09 / 09</span>　聯絡窗口</span>
+    <h2 class="ink">把落差談清楚，<br>本中心<span class="big">全力支援</span>凌網完成介接</h2></div>
+    <div class="cards reveal">
+      <div class="who"><div class="role">智慧閱讀・主辦</div><div class="nm">周凡淇　組長</div><div class="org">蓬萊國小 數位學習中心 系統組<br>nora@hhups.tp.edu.tw<br>(02) 2556-9835 #580 #12</div></div>
+      <div class="who"><div class="role">建置廠商</div><div class="nm">凌網資訊</div><div class="org">PM　江怡蓓 Rebecca<br>業務　林淑芬 Selina</div></div>
+      <div class="who"><div class="role">線上資料庫維運</div><div class="nm">巨耀資訊</div><div class="org">介接：詹淵蘭　keiko@oneplus.com.tw<br>規格 V1.5 已附於本簡報</div></div>
+    </div>
+    <p class="note reveal">本中心立場：<b>教育雲介接不是把難題丟給凌網</b> — 原始碼、其他系統經驗、規格附件我們都會盡力備齊。今天請凌網先告訴我們：<b>哪裡需要幫忙。</b></p>
+  </section>
+
+</div>
+
+<div class="dots" id="dots"></div>
+<div class="chrome">
+  <div class="counter"><b id="cur">1</b> / <span id="tot">10</span></div>
+  <div class="nav">
+    <button id="prev" aria-label="上一頁">‹</button>
+    <button id="next" aria-label="下一頁">›</button>
+  </div>
+</div>
+<div class="hint">← → 或空白鍵翻頁　·　按數字鍵跳頁</div>
+
+<script>
+(function(){
+  // 翻頁控制：鍵盤、觸控滑動、圓點、進度條
+  const slides=[...document.querySelectorAll('.slide')];
+  const N=slides.length;
+  let i=0;
+  const progress=document.getElementById('progress');
+  const cur=document.getElementById('cur');
+  const dots=document.getElementById('dots');
+  document.getElementById('tot').textContent=N;
+  slides.forEach((_,k)=>{const d=document.createElement('i');d.onclick=()=>go(k);dots.appendChild(d)});
+  const dotEls=[...dots.children];
+  function go(n){
+    i=Math.max(0,Math.min(N-1,n));
+    slides.forEach((s,k)=>s.classList.toggle('active',k===i));
+    dotEls.forEach((d,k)=>d.classList.toggle('on',k===i));
+    progress.style.width=((i)/(N-1)*100)+'%';
+    cur.textContent=i+1;
+    document.getElementById('prev').disabled=i===0;
+    document.getElementById('next').disabled=i===N-1;
+  }
+  document.getElementById('next').onclick=()=>go(i+1);
+  document.getElementById('prev').onclick=()=>go(i-1);
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(i+1)}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(i-1)}
+    else if(e.key==='Home'){go(0)} else if(e.key==='End'){go(N-1)}
+    else if(/^[1-9]$/.test(e.key)){go(parseInt(e.key)-1)}
+  });
+  let x0=null;
+  document.addEventListener('touchstart',e=>x0=e.touches[0].clientX,{passive:true});
+  document.addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>50)go(i+(dx<0?1:-1));x0=null},{passive:true});
+  go(0);
+})();
+</script>
+</body>
+</html>
